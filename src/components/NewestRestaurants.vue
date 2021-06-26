@@ -27,18 +27,10 @@ small {
 </style>
 
 <script>
-import moment from "moment";
+import { fromNowFilter } from "./../utils/mixins";
 
 export default {
-  filters: {
-    fromNow(value) {
-      if (!value) {
-        return "-";
-      }
-      // 使用 moment 取得 fromNow 的時間
-      return moment(value).fromNow();
-    },
-  },
+  mixins: [fromNowFilter],
   // props: can view; cannot edit
   props: {
     restaurants: {
