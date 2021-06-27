@@ -1,17 +1,17 @@
 <template>
   <div class="card">
     <div class="card-header">
-      <strong>{{ followers.length }}</strong>
-      followers (追隨者)
+      <strong>{{ favoritedRestaurants.length }}</strong>
+      收藏的餐廳
     </div>
     <div class="card-body">
       <router-link
-        v-for="follower in followers"
-        :key="follower.id"
-        :to="{ name: 'user-profile', params: { id: follower.id } }"
+        v-for="restaurant in favoritedRestaurants"
+        :key="restaurant.id"
+        :to="{ name: 'restaurant', params: { id: restaurant.id } }"
       >
         <img
-          :src="follower.image"
+          :src="restaurant.image"
           alt=""
           style="width: 60px; height: 60px"
           class="mr-2"
@@ -23,9 +23,9 @@
 
 <script>
 export default {
-  name: "UserFollowersCard",
+  name: "UserFavoritedRestaurantsCard",
   props: {
-    followers: {
+    favoritedRestaurants: {
       type: Array,
       required: true,
     },

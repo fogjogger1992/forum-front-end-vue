@@ -21,6 +21,9 @@
           <UserCommentsCard :comments="userProfile.Comments" />
 
           <!-- UserFavoritedRestaurantsCard -->
+          <UserFavoritedRestaurantsCard
+            :favorited-restaurants="userProfile.FavoritedRestaurants"
+          />
         </div>
       </div>
     </div>
@@ -32,6 +35,7 @@ import UserProfileCard from "./../components/UserProfileCard.vue";
 import UserFollowingsCard from "./../components/UserFollowingsCard";
 import UserFollowersCard from "./../components/UserFollowersCard";
 import UserCommentsCard from "./../components/UserCommentsCard.vue";
+import UserFavoritedRestaurantsCard from "./../components/UserFavoritedRestaurantsCard.vue";
 
 const dummyData = {
   profile: {
@@ -1298,6 +1302,7 @@ export default {
     UserFollowingsCard,
     UserFollowersCard,
     UserCommentsCard,
+    UserFavoritedRestaurantsCard,
   },
   data() {
     return {

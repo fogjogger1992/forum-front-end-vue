@@ -2,7 +2,7 @@
   <div class="card">
     <div class="card-header">
       <strong>{{ followings.length }}</strong>
-      following(追蹤者)
+      following (追蹤者)
     </div>
     <div class="card-body">
       <router-link
