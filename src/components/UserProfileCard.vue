@@ -35,7 +35,7 @@
             </li>
           </ul>
           <template>
-            <a v-if="userProfile.isAdmin" href="">
+            <a v-if="currentUser.id === userProfile.id" href="">
               <button type="submit" class="btn btn-primary">edit</button>
             </a>
 
