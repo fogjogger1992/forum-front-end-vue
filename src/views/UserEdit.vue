@@ -75,6 +75,7 @@ const dummyUser = {
 };
 
 export default {
+  name: "UserEdit",
   data() {
     return {
       profile: {
