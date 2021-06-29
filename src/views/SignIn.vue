@@ -51,6 +51,8 @@
 </template>
 
 <script>
+import authorizationAPI from "./../apis/authorization.js";
+
 export default {
   data() {
     return {
@@ -60,14 +62,17 @@ export default {
   },
   methods: {
     handleSubmit() {
-      // TODO: 向後端伺服器驗證使用者資料
-      console.log(
-        "handleSubmit",
-        JSON.stringify({
+      authorizationAPI
+        .signIn({
           email: this.email,
           password: this.password,
         })
-      );
+        .then((response) => {
+          const { data } = response;
+          localStorage.setItem("token", data.token);
+
+          this.$router.push("/restaurants");
+        });
     },
   },
 };
