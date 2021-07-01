@@ -56,7 +56,7 @@ export default {
           (comment) => comment.Restaurant && comment.text
         );
       } catch (error) {
-        "error", error;
+        console.log("error", error);
         Toast.fire({
           icon: "error",
           title: "無法取得資料，請稍後再試",
