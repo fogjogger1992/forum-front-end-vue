@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import NotFound from '../views/NotFound.vue'
 import SignIn from '../views/SignIn.vue'
 import Restaurants from '../views/Restaurants.vue'
+import store from './../store'
 
 Vue.use(VueRouter)
 
@@ -10,103 +11,108 @@ const routes = [
   {
     path: '/',
     name: 'root',
-    redirect: '/signin'
+    redirect: '/signin',
   },
   {
     path: '/signin',
     name: 'sign-in',
-    component: SignIn
+    component: SignIn,
   },
   {
     path: '/signup',
     name: 'sign-up',
-    component: () => import('../views/SignUp.vue')
+    component: () => import('../views/SignUp.vue'),
   },
   {
     path: '/restaurants',
     name: 'restaurants',
-    component: Restaurants
+    component: Restaurants,
   },
   {
     path: '/restaurants/feeds',
     name: 'restaurants-feeds',
-    component: () => import('../views/RestaurantsFeeds.vue')
+    component: () => import('../views/RestaurantsFeeds.vue'),
   },
   {
     path: '/restaurants/top',
     name: 'reataurants-top',
-    component: () => import('../views/RestaurantsTop.vue')
+    component: () => import('../views/RestaurantsTop.vue'),
   },
   {
     path: '/restaurants/:id',
     name: 'restaurant',
-    component: () => import('../views/Restaurant.vue')
+    component: () => import('../views/Restaurant.vue'),
   },
   {
     path: '/restaurants/:id/dashboard',
     name: 'restaurant-dashboard',
-    component: () => import('../views/RestaurantDashboard.vue')
+    component: () => import('../views/RestaurantDashboard.vue'),
   },
   {
     path: '/users/top',
     name: 'users-top',
-    component: () => import('../views/UsersTop.vue')
+    component: () => import('../views/UsersTop.vue'),
   },
   {
     path: '/users/:id/edit',
     name: 'user-edit',
-    component: () => import('../views/UserEdit.vue')
+    component: () => import('../views/UserEdit.vue'),
   },
   {
     path: '/users/:id',
     name: 'user-profile',
-    component: () => import('../views/User.vue')
+    component: () => import('../views/User.vue'),
   },
   {
     path: '/admin',
     exact: true,
-    redirect: '/admin/restaurants'
+    redirect: '/admin/restaurants',
   },
   {
     path: '/admin/restaurants',
     name: 'admin-restaurants',
-    component: () => import('../views/AdminRestaurants.vue')
+    component: () => import('../views/AdminRestaurants.vue'),
   },
   {
     path: '/admin/restaurants/new',
     name: 'admin-restaurant-new',
-    component: () => import('../views/AdminRestaurantNew.vue')
+    component: () => import('../views/AdminRestaurantNew.vue'),
   },
   {
     path: '/admin/restaurants/:id/edit',
     name: 'admin-restaurant-edit',
-    component: () => import('../views/AdminRestaurantEdit.vue')
+    component: () => import('../views/AdminRestaurantEdit.vue'),
   },
   {
     path: '/admin/restaurants/:id',
     name: 'admin-restaurant',
-    component: () => import('../views/AdminRestaurant.vue')
+    component: () => import('../views/AdminRestaurant.vue'),
   },
   {
     path: '/admin/categories',
     name: 'admin-categories',
-    component: () => import('../views/AdminCategories.vue')
+    component: () => import('../views/AdminCategories.vue'),
   },
   {
     path: '/admin/users',
     name: 'admin-users',
-    component: () => import('../views/AdminUsers.vue')
+    component: () => import('../views/AdminUsers.vue'),
   },
   {
     path: '*',
     name: 'not-found',
-    component: NotFound
-  }
+    component: NotFound,
+  },
 ]
 
 const router = new VueRouter({
   linkExactActiveClass: 'active',
-  routes
+  routes,
+})
+
+router.beforeEach((to, from, next) => {
+  store.dispatch('fetchCurrentUser')
+  next()
 })
 
 export default router
