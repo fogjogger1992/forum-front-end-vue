@@ -29,11 +29,11 @@ export default new Vuex.Store({
   },
   // 透過 API 請求資料，用 dispatch 發動
   actions: {
-    async fetchCurrentUser({ commit }) {
+    async fetchCurrentUser ({ commit }) {
       try {
         const { data } = await usersAPI.getCurrentUser()
 
-        if (data.status !== 'success') {
+        if (data.status === 'error') {
           throw new Error(data.message)
         }
 
@@ -44,12 +44,12 @@ export default new Vuex.Store({
           name,
           email,
           image,
-          isAdmin,
+          isAdmin
         })
       } catch (error) {
-        console.error(error)
+        console.error(error.message)
       }
-    },
+    }
   },
   // 拆檔
   modules: {},
