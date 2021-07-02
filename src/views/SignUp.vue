@@ -78,6 +78,9 @@
 </template>
 
 <script>
+import authorizationAPI from "./../apis/authorization";
+import { Toast } from "./../utils/helpers";
+
 export default {
   data() {
     return {
@@ -88,7 +91,54 @@ export default {
     };
   },
   methods: {
-    handleSubmit() {
+    async handleSubmit() {
+      try {
+        // check empty input
+        if (
+          !this.name ||
+          !this.email ||
+          !this.password ||
+          !this.passwordCheck
+        ) {
+          Toast.fire({
+            icon: "warning",
+            title: "請確實填入所有欄位",
+          });
+          return;
+        }
+        // password check
+        if (this.password !== this.passwordCheck) {
+          Toast.fire({
+            icon: "warning",
+            title: "請檢查輸入的密碼是否相同",
+          });
+          this.passwordCheck = "";
+          return;
+        }
+        // sign up
+        const { data } = await authorizationAPI.signUp({
+          name: this.name,
+          email: this.email,
+          password: this.password,
+          passwordCheck: this.passwordCheck,
+        });
+
+        if (data.status === "error") {
+          throw new Error(data.message);
+        }
+
+        Toast.fire({
+          icon: "success",
+          title: `註冊成功: ${data.message}`,
+        });
+
+        this.$router.push({ name: "sign-in" });
+      } catch (error) {
+        Toast.fire({
+          icon: "warning",
+          title: `無法註冊，錯誤訊息: ${error.message}`,
+        });
+      }
       const data = {
         name: this.name,
         email: this.email,
