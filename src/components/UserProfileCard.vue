@@ -3,7 +3,7 @@
     <div class="row no-gutters">
       <div class="col-md-4">
         <img
-          :src="userProfile.image"
+          :src="userProfile.image | emptyImage"
           alt=""
           style="width: 300px; height: 300px"
         />
@@ -36,7 +36,7 @@
           </ul>
           <template>
             <router-link
-              v-if="currentUser.id === userProfile.id"
+              v-if="isCurrentUser"
               :to="{
                 name: 'user-edit',
                 params: { id: userProfile.id },
@@ -46,18 +46,18 @@
             </router-link>
 
             <button
-              v-if="isFollowed && currentUser.id !== userProfile.id"
+              v-if="!isFollowed && !isCurrentUser"
               type="submit"
               class="btn btn-info"
-              @click.stop.prevent="switchFollowing"
+              @click.stop.prevent="addFollowing(userProfile.id)"
             >
               追蹤
             </button>
             <button
-              v-else-if="!isFollowed && currentUser.id !== userProfile.id"
+              v-else-if="isFollowed && !isCurrentUser"
               type="submit"
               class="btn btn-danger"
-              @click.stop.prevent="switchFollowing"
+              @click.stop.prevent="deleteFollowing(userProfile.id)"
             >
               取消追蹤
             </button>
@@ -69,23 +69,21 @@
 </template>
 
 <script>
-const dummyUser = {
-  currentUser: {
-    id: 10,
-    name: "Test",
-    email: "test@example.com",
-    image: "https://i.pravatar.cc/300",
-    isAdmin: true,
-  },
-  isAuthenticated: true,
-};
+import { emptyImageFilter } from "./../utils/mixins";
+import usersAPI from "./../apis/users";
+import { Toast } from "./../utils/helpers";
 
 export default {
   name: "UserProfileCard",
+  mixins: [emptyImageFilter],
   props: {
     userProfile: {
       type: Object,
       requird: true,
+    },
+    isCurrentUser: {
+      type: Boolean,
+      required: true,
     },
     initialIsFollowed: {
       type: Boolean,
@@ -94,13 +92,44 @@ export default {
   },
   data() {
     return {
-      currentUser: dummyUser.currentUser,
       isFollowed: this.initialIsFollowed,
     };
   },
+  watch: {
+    initialIsFollowed(isFollowed) {
+      this.isFollowed = isFollowed;
+    },
+  },
   methods: {
-    switchFollowing() {
-      this.isFollowed = !this.isFollowed;
+    async addFollowing(userId) {
+      try {
+        const { data } = await usersAPI.addFollowing({ userId });
+        if (data.status === "error") {
+          throw new Error(data.message);
+        }
+        this.isFollowed = true;
+      } catch (error) {
+        console.error(error.message);
+        Toast.fire({
+          icon: "error",
+          title: "無法加入追蹤，請稍後再試",
+        });
+      }
+    },
+    async deleteFollowing(userId) {
+      try {
+        const { data } = await usersAPI.deleteFollowing({ userId });
+        if (data.status === "error") {
+          throw new Error(data.message);
+        }
+        this.isFollowed = false;
+      } catch (error) {
+        console.error(error.message);
+        Toast.fire({
+          icon: "error",
+          title: "無法取消追蹤，請稍後再試",
+        });
+      }
     },
   },
 };
