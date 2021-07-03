@@ -88,6 +88,14 @@ export default {
       restaurant: this.initialRestaurant,
     };
   },
+  watch: {
+    initialRestaurant(newValue) {
+      this.restaurant = {
+        ...this.restaurant,
+        ...newValue,
+      };
+    },
+  },
   methods: {
     deleteFavorite() {
       this.restaurant = {
