@@ -9,13 +9,20 @@
       <button type="button" class="btn btn-link" @click="$router.back()">
         回上一頁
       </button>
-      <button type="submit" class="btn btn-primary mr-0">Submit</button>
+      <button
+        :disabled="isProcessing"
+        type="submit"
+        class="btn btn-primary mr-0"
+      >
+        Submit
+      </button>
     </div>
   </form>
 </template>
 
 <script>
-import { v4 as uuidv4 } from "uuid";
+import commentsAPI from "./../apis/comments";
+import { Toast } from "./../utils/helpers";
 
 export default {
   props: {
@@ -27,18 +34,51 @@ export default {
   data() {
     return {
       text: "",
+      isProcessing: false,
     };
   },
   methods: {
-    handleSubmit() {
-      // TODO: 向 API 發送 POST 請求
-      // 伺服器新增 Comment 成功後...
-      this.$emit("after-create-comment", {
-        commentId: uuidv4(), // random Id, not yet connect to API
-        restaurantId: this.restaurantId,
-        text: this.text,
-      });
-      this.text = ""; // remove the texts in form after adding
+    async handleSubmit() {
+      try {
+        // empty input
+        if (!this.text) {
+          Toast.fire({
+            icon: "warning",
+            title: "請填寫評論",
+          });
+          return;
+        }
+
+        this.isProcessing = true;
+        const { data } = await commentsAPI.create({
+          restaurantId: this.restaurantId,
+          text: this.text,
+        });
+
+        if (data.status === "error") {
+          throw new Error(data.message);
+        }
+
+        // 伺服器新增 Comment 成功後...
+        this.$emit("after-create-comment", {
+          commentId: data.commentId,
+          restaurantId: this.restaurantId,
+          text: this.text,
+        });
+        Toast.fire({
+          icon: "success",
+          title: "成功添加評論",
+        });
+
+        this.isProcessing = false;
+        this.text = ""; // remove the texts in form after adding
+      } catch (error) {
+        this.isProcessing = false;
+        Toast.fire({
+          icon: "error",
+          title: "無法新增評論，請稍後再試",
+        });
+      }
     },
   },
 };

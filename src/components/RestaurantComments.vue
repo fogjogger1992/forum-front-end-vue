@@ -31,17 +31,9 @@
 
 <script>
 import { fromNowFilter } from "./../utils/mixins";
-
-const dummyUser = {
-  currentUser: {
-    id: 1,
-    name: "管理者",
-    email: "root@example.com",
-    image: "https://i.pravatar.cc/300",
-    isAdmin: true,
-  },
-  isAuthenticated: true,
-};
+import { mapState } from "vuex";
+import commentsAPI from "./../apis/comments";
+import { Toast } from "./../utils/helpers";
 
 export default {
   name: "RestaurantComments",
@@ -52,17 +44,29 @@ export default {
       required: true,
     },
   },
-  data() {
-    return {
-      currentUser: dummyUser.currentUser,
-    };
+  computed: {
+    ...mapState(["currentUser"]),
   },
   methods: {
-    handleDeleteButtonClick(commentId) {
-      console.log("handleDeleteButtonClick", commentId);
+    async handleDeleteButtonClick(commentId) {
+      try {
+        const { data } = await commentsAPI.delete({ commentId });
 
-      // TODO: 透過API請求伺服器刪除該筆comment ...
-      this.$emit("after-delete-comment", commentId);
+        if (data.status === "error") {
+          throw new Error(data.message);
+        }
+
+        this.$emit("after-delete-comment", commentId);
+        Toast.fire({
+          icon: "success",
+          title: "成功移除評論",
+        });
+      } catch (error) {
+        Toast.fire({
+          icon: "error",
+          title: "無法刪除該筆評論，請稍後再試",
+        });
+      }
     },
   },
 };
