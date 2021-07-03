@@ -33,46 +33,17 @@
         />
       </div>
 
-      <button type="submit" class="btn btn-primary">Submit</button>
+      <button :disabled="isProcessing" type="submit" class="btn btn-primary">
+        {{ isProcessing ? "更新中..." : "Submit" }}
+      </button>
     </form>
   </div>
 </template>
 
 <script>
-const dummyUser = {
-  profile: {
-    id: 51,
-    name: "Ryan",
-    email: "123@gmail.com",
-    password: "$2a$10$9uleePVR1Sizan2sYraSwufL9SKBx9UPaYkrvRM7UJ0Hbcb4VXtWu",
-    isAdmin: false,
-    image: "https://i.imgur.com/eVfTIsY.jpg",
-    createdAt: "2021-06-26T09:22:30.000Z",
-    updatedAt: "2021-06-26T09:22:30.000Z",
-    Comments: [],
-    FavoritedRestaurants: [],
-    Followers: [],
-    Followings: [
-      {
-        id: 1,
-        name: "root",
-        email: "root@example.com",
-        password:
-          "$2a$10$XaxJSOdUg2/931GxMxcJpOWAB1wmUbW5WUwM1GohFh0SyfUxHNYKG",
-        isAdmin: false,
-        image: "https://i.imgur.com/eVfTIsY.jpg",
-        createdAt: "2021-05-17T05:11:05.000Z",
-        updatedAt: "2021-06-23T12:15:27.000Z",
-        Followship: {
-          followerId: 51,
-          followingId: 1,
-          createdAt: "2021-06-27T07:46:39.000Z",
-          updatedAt: "2021-06-27T07:46:39.000Z",
-        },
-      },
-    ],
-  },
-};
+import { mapState } from "vuex";
+import usersAPI from "./../apis/users";
+import { Toast } from "./../utils/helpers";
 
 export default {
   name: "UserEdit",
@@ -83,24 +54,39 @@ export default {
         name: "",
         image: "",
       },
+      isProcessing: false,
     };
+  },
+  computed: {
+    ...mapState(["currentUser"]),
+  },
+  watch: {
+    currentUser(user) {
+      if (user.id === -1) return;
+      const { id } = this.$route.params;
+      this.setUser(id);
+    },
   },
   created() {
     const { id } = this.$route.params;
-    this.fetchUser(id);
+    this.setUser(id);
+  },
+  beforeRouteUpdate(to, from, next) {
+    if (this.currentUser.id === -1) return;
+    const { id } = to.params;
+    this.setUser(id);
+    next();
   },
   methods: {
-    fetchUser(userId) {
-      console.log("fetchUser id:", userId);
-
-      const { profile } = dummyUser;
-      const { id, name, image } = profile;
-      this.profile = {
-        ...this.profile,
-        id,
-        name,
-        image,
-      };
+    setUser(userId) {
+      const { id, name, image } = this.currentUser;
+      if (id.toString() !== userId.toString()) {
+        this.$router.push({ name: "not-found" });
+        return;
+      }
+      this.profile.id = id;
+      this.profile.name = name;
+      this.profile.image = image;
     },
     handleFileChange(e) {
       const { files } = e.target;
@@ -112,10 +98,37 @@ export default {
         this.profile.image = imageURL;
       }
     },
-    handleSubmit(e) {
-      const form = e.target;
-      const formData = new FormData(form);
-      this.$emit("after-submit", formData);
+    async handleSubmit(e) {
+      try {
+        // empty input
+        if (!this.profile.name) {
+          Toast.fire({
+            icon: "warning",
+            title: "請填寫姓名",
+          });
+          return;
+        }
+
+        const form = e.target;
+        const formData = new FormData(form);
+        this.isProcessing = true;
+
+        const { data } = await usersAPI.update({
+          userId: this.profile.id,
+          formData,
+        });
+
+        if (data.status === "error") {
+          throw new Error(data.message);
+        }
+        this.$router.push(`/users/${this.profile.id}`);
+      } catch (error) {
+        this.isProcessing = false;
+        Toast.fire({
+          icon: "error",
+          title: "無法更新使用者資料，請稍後再試",
+        });
+      }
     },
   },
 };
