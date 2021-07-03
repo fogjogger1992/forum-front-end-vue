@@ -60,7 +60,6 @@ export default {
   data() {
     return {
       users: [],
-      currentUser: {},
     };
   },
   computed: {

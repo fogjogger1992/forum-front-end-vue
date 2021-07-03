@@ -26,6 +26,11 @@ export default new Vuex.Store({
       }
       state.isAuthenticated = true
     },
+    revokeAuthentication(state) {
+      state.currentUser = {}
+      state.isAuthenticated = false
+      localStorage.removeItem('token')
+    }
   },
   // 透過 API 請求資料，用 dispatch 發動
   actions: {
