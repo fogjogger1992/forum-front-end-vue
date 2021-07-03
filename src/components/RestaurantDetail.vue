@@ -10,7 +10,7 @@
     <div class="col-lg-4">
       <img
         class="img-responsive center-block"
-        :src="restaurant.image"
+        :src="restaurant.image | emptyImage"
         style="width: 250px; margin-bottom: 25px"
       />
       <div class="contact-info-wrap">
@@ -41,7 +41,7 @@
 
       <button
         v-if="restaurant.isFavorited"
-        @click.stop.prevent="deleteFavorite"
+        @click.stop.prevent="deleteFavorite(restaurant.id)"
         type="button"
         class="btn btn-danger btn-border mr-2"
       >
@@ -49,7 +49,7 @@
       </button>
       <button
         v-else
-        @click.stop.prevent="addFavorite"
+        @click.stop.prevent="addFavorite(restaurant.id)"
         type="button"
         class="btn btn-primary btn-border mr-2"
       >
@@ -57,7 +57,7 @@
       </button>
       <button
         v-if="restaurant.isLiked"
-        @click.stop.prevent="dislike"
+        @click.stop.prevent="dislike(restaurant.id)"
         type="button"
         class="btn btn-danger like mr-2"
       >
@@ -65,7 +65,7 @@
       </button>
       <button
         v-else
-        @click.stop.prevent="like"
+        @click.stop.prevent="like(restaurant.id)"
         type="button"
         class="btn btn-primary like mr-2"
       >
@@ -76,7 +76,13 @@
 </template>
 
 <script>
+import { emptyImageFilter } from "./../utils/mixins";
+import usersAPI from "./../apis/users";
+import { Toast } from "./../utils/helpers";
+
 export default {
+  name: "RestaurantDetail",
+  mixins: [emptyImageFilter],
   props: {
     initialRestaurant: {
       type: Object,
@@ -97,29 +103,79 @@ export default {
     },
   },
   methods: {
-    deleteFavorite() {
-      this.restaurant = {
-        ...this.restaurant,
-        isFavorited: false,
-      };
+    async deleteFavorite(restaurantId) {
+      try {
+        const { data } = await usersAPI.deleteFavorite({ restaurantId });
+        if (data.status === "error") {
+          throw new Error(data.message);
+        }
+        this.restaurant = {
+          ...this.restaurant,
+          isFavorited: false,
+        };
+      } catch (error) {
+        console.error(error.message);
+        Toast.fire({
+          icon: "error",
+          title: "無法移除最愛，請稍後再試",
+        });
+      }
     },
-    addFavorite() {
-      this.restaurant = {
-        ...this.restaurant,
-        isFavorited: true,
-      };
+    async addFavorite(restaurantId) {
+      try {
+        const { data } = await usersAPI.addFavorite({
+          restaurantId,
+        });
+        if (data.status === "error") {
+          throw new Error(data.message);
+        }
+        this.restaurant = {
+          ...this.restaurant,
+          isFavorited: true,
+        };
+      } catch (error) {
+        console.error(error.message);
+        Toast.fire({
+          icon: "error",
+          title: "無法加入最愛，請稍後再試",
+        });
+      }
     },
-    dislike() {
-      this.restaurant = {
-        ...this.restaurant,
-        isLiked: false,
-      };
+    async dislike(restaurantId) {
+      try {
+        const { data } = await usersAPI.deleteLike({ restaurantId });
+        if (data.status === "error") {
+          throw new Error(data.message);
+        }
+        this.restaurant = {
+          ...this.restaurant,
+          isLiked: false,
+        };
+      } catch (error) {
+        console.error(error.message);
+        Toast.fire({
+          icon: "error",
+          title: "無法 DISLIKE，請稍後再試",
+        });
+      }
     },
-    like() {
-      this.restaurant = {
-        ...this.restaurant,
-        isLiked: true,
-      };
+    async like(restaurantId) {
+      try {
+        const { data } = await usersAPI.addLike({ restaurantId });
+        if (data.status === "error") {
+          throw new Error(data.message);
+        }
+        this.restaurant = {
+          ...this.restaurant,
+          isLiked: true,
+        };
+      } catch (error) {
+        console.error(error.message);
+        Toast.fire({
+          icon: "error",
+          title: "無法 LIKE，請稍後再試",
+        });
+      }
     },
   },
 };
